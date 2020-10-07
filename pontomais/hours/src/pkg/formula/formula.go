@@ -57,7 +57,7 @@ func printDays(days []WorkDays, w io.Writer, now time.Time) {
 	weekTime := 0
 	for _, d := range days {
 		_, _ = fmt.Fprintf(w, "---\n")
-		workTime := int64(0)
+		workTime := 0
 		invalid := false
 		for i, t := range d.TimeCards {
 			if i == 0 {
@@ -66,25 +66,26 @@ func printDays(days []WorkDays, w io.Writer, now time.Time) {
 			hour, _ := time.Parse("15:04", t.Time)
 			if i%2 == 0 {
 				invalid = true
-				workTime -= hour.UTC().Unix()
-				if i + 1 == len(d.TimeCards) && now.Format("2006-01-02") == t.Date {
+				workTime -= hour.UTC().Hour()*60 + hour.UTC().Minute()
+				nowCopy := now
+				if i+1 == len(d.TimeCards) && nowCopy.Format("2006-01-02") == t.Date {
 					invalid = false
-					workTime += now.Unix()
+					workTime += now.Hour()*60 + now.Minute()
 				}
 			} else {
 				invalid = false
-				workTime += hour.UTC().Unix()
+				workTime += hour.UTC().Hour()*60 + hour.UTC().Minute()
 			}
 			_, _ = fmt.Fprintf(w, "- %s\n", t.Time)
 		}
 		if invalid {
 			_, _ = fmt.Fprintf(w, "WorkTime: invalid\n")
 		} else {
-			_, _ = fmt.Fprintf(w, "WorkTime: %s\n", time.Unix(workTime, 0).UTC().Format("15:04"))
-			weekTime += time.Unix(workTime, 0).UTC().Hour() * 60 + time.Unix(workTime, 0).UTC().Minute()
+			_, _ = fmt.Fprintf(w, "WorkTime: %.2d:%.2d\n", workTime/60, workTime%60)
+			weekTime += workTime
 		}
 	}
-	_, _ = fmt.Fprintf(w, "WeekTime: %.2d:%.2d\n", weekTime / 60 , weekTime % 60 )
+	_, _ = fmt.Fprintf(w, "WeekTime: %.2d:%.2d\n", weekTime/60, weekTime%60)
 }
 
 func (f Formula) wordDays(auth auth) ([]WorkDays, error) {
