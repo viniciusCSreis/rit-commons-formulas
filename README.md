@@ -22,7 +22,7 @@ This repository contains rit formulas which can be executed by the [ritchie-cli]
  Is a private repository?
   > no
  Select a tag version:
-  > 1.0.0
+  > 1.0.2
  Set the priority: 100
 ```
 
