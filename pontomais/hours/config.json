@@ -1,0 +1,13 @@
+{
+  "dockerImageBuilder": "cimg/go:1.14",
+  "inputs": [
+    {
+      "name": "PONTOMAIS_LOGIN",
+      "type": "CREDENTIAL_PONTOMAIS_LOGIN"
+    },
+    {
+      "name": "PONTOMAIS_PASSWORD",
+      "type": "CREDENTIAL_PONTOMAIS_PASSWORD"
+    }
+  ]
+}
