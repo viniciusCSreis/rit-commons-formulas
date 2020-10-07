@@ -7,7 +7,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"reflect"
 	"time"
 )
@@ -46,25 +48,43 @@ func (f Formula) Run() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Work Hours:\n")
+	printDays(days, os.Stdout, time.Now())
+
+}
+
+func printDays(days []WorkDays, w io.Writer, now time.Time) {
+	_, _ = fmt.Fprintf(w, "Work Hours:\n")
+	weekTime := 0
 	for _, d := range days {
-		fmt.Printf("---\n")
+		_, _ = fmt.Fprintf(w, "---\n")
 		workTime := int64(0)
+		invalid := false
 		for i, t := range d.TimeCards {
 			if i == 0 {
-				fmt.Printf("Data: %s\n", t.Date)
+				_, _ = fmt.Fprintf(w, "Data: %s\n", t.Date)
 			}
 			hour, _ := time.Parse("15:04", t.Time)
 			if i%2 == 0 {
+				invalid = true
 				workTime -= hour.UTC().Unix()
+				if i + 1 == len(d.TimeCards) && now.Format("2006-01-02") == t.Date {
+					invalid = false
+					workTime += now.Unix()
+				}
 			} else {
+				invalid = false
 				workTime += hour.UTC().Unix()
 			}
-			fmt.Printf("- %s \n", t.Time)
+			_, _ = fmt.Fprintf(w, "- %s\n", t.Time)
 		}
-		fmt.Printf("WorkTime: %s\n", time.Unix(workTime, 0).UTC().Format("15:04"))
+		if invalid {
+			_, _ = fmt.Fprintf(w, "WorkTime: invalid\n")
+		} else {
+			_, _ = fmt.Fprintf(w, "WorkTime: %s\n", time.Unix(workTime, 0).UTC().Format("15:04"))
+			weekTime += time.Unix(workTime, 0).UTC().Hour() * 60 + time.Unix(workTime, 0).UTC().Minute()
+		}
 	}
-
+	_, _ = fmt.Fprintf(w, "WeekTime: %.2d:%.2d\n", weekTime / 60 , weekTime % 60 )
 }
 
 func (f Formula) wordDays(auth auth) ([]WorkDays, error) {
