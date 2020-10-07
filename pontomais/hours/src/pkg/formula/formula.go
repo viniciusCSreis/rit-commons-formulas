@@ -101,7 +101,7 @@ func (f Formula) wordDays(auth auth) ([]WorkDays, error) {
 		http.MethodGet,
 		fmt.Sprintf(
 			"https://api.pontomais.com.br/api/time_card_control/current/work_days?sort_direction=asc&sort_property=date&start_date=%s&end_date=%s&with_employee=true",
-			today.Add(time.Hour*24*7*-1).Format("2006-01-02"),
+			today.Add(time.Hour*24*6*-1).Format("2006-01-02"),
 			today.Format("2006-01-02"),
 		),
 		bytes.NewReader(body),
